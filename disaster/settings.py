@@ -79,7 +79,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "disaster",
         "USER": "root",
-        "PASSWORD": "123456789",
+        "PASSWORD": "eldho@20",
         "PORT": 3306,
         "HOST": "127.0.0.1",
     }
@@ -126,3 +126,6 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# myproject/settings.py
+AUTH_USER_MODEL = 'base.CustomUser'

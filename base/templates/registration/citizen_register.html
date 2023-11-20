@@ -1,0 +1,7 @@
+<!-- templates/registration/student_register.html -->
+<form method="post" action="{% url 'citizen_register' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Register</button>
+  </form>
+  
