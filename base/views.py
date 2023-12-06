@@ -1,23 +1,23 @@
-# from django.shortcuts import render
-# from django.http import HttpResponse
-
-# def home(request):
-#   return HttpResponse("hello world")
-
 # myapp/views.py
+from django.http import HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
+from django.utils.text import slugify
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login,authenticate
 from .forms import CitizenUserCreationForm, StaffUserCreationForm
+from .models import CitizenUser,CitizenDetails,StaffUser,Survey,Transfer
+from django.contrib import messages
 
 def home(request):
     return render(request,'home.html',{})
+
 def citizen_register(request):
     if request.method == 'POST':
         form = CitizenUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('home')  # Redirect to the home page or another URL
+            return redirect('citizen_login')  # Redirect to the home page or another URL
     else:
         form = CitizenUserCreationForm()
     return render(request, 'registration/citizen_register.html', {'form': form})
@@ -28,7 +28,145 @@ def staff_register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('home')  # Redirect to the home page or another URL
+            return redirect('staff_login')  # Redirect to the home page or another URL
     else:
         form = StaffUserCreationForm()
     return render(request, 'registration/staff_register.html', {'form': form})
+
+def citizen_login(request):
+    msg=''
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            # Credentials are valid, proceed to login
+            login(request, user)
+            # Redirect to a success page or perform other actions
+            object=CitizenUser.objects.get(username=username)
+            cid=object.pk
+            return render(request,'homepage/citizenhome.html',{'cid':cid})
+        else:
+            # Credentials are not valid, handle authentication failure
+            msg='Invalid username or password'
+    
+    return render(request,'login/citizenLogin.html',{'msg':msg})
+
+def staff_login(request):
+    msg=''
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            # Credentials are valid, proceed to login
+            login(request, user)
+            # Redirect to a success page or perform other actions
+            return redirect('staff-home')
+        else:
+            # Credentials are not valid, handle authentication failure
+            msg='Invalid staff id or password'
+
+    
+    return render(request,'login/staffLogin.html',{'msg':msg})
+
+@login_required(login_url="/login/citizen/")
+def citizen_home(request):
+    user=request.user.username
+    ob=CitizenUser.objects.filter(username=user)
+    return render(request,'homepage/citizenhome.html',{'name':ob[0].name})
+
+@login_required(login_url="/login/citizen/")
+def citizen_applicationform(request):
+    submitted=False
+    user=request.user.username
+    ob=CitizenDetails.objects.filter(username=user)
+    if ob.exists():
+        submitted=True
+    if request.method=='POST':
+        instance=CitizenDetails()
+        instance.username=user
+        instance.name=ob[0].name
+        instance.house_no=request.POST['house_no']
+        instance.house_name=request.POST['house_name']
+        instance.address=request.POST['address']
+        instance.village_code=request.POST['village_code']
+        instance.aadhar_no=request.POST['aadhar_no']
+        instance.ration_no=request.POST['ration_no']
+        instance.account_no=request.POST['account_no']
+        instance.ifsc=request.POST['ifsc']
+        instance.description=request.POST['description']
+        instance.save()
+        return HttpResponseRedirect('/citizen/applicationform/')
+  
+    return render(request,'allforms/applicationform_fill.html',{'submitted':submitted})
+
+
+@login_required(login_url="login/citizen/")
+def citizen_details_display(request):
+    user=request.user.username
+    ob=CitizenDetails.objects.filter(username=user)
+    return render(request,'allforms/applictionform_display.html',{'instance':ob[0]})
+
+@login_required(login_url="login/citizen/")
+def citizen_application_status(request):
+    user=request.user.username
+    ob=CitizenDetails.objects.filter(username=user)
+    if not ob:
+        msg='Please fill application form'
+    elif ob[0].survey_result:
+        msg='Application Accepted'
+    else:
+        msg='Application under scrutiny'
+    return render(request,'allforms/citizen_status.html',{'msg':msg})
+
+@login_required(login_url="login/staff/")
+def staff_home(request):
+    user=request.user.username
+    print('user=',user)
+    if user=='eldho':
+        return redirect("staff_login")
+    staffob=StaffUser.objects.filter(username=user)
+    objs=CitizenDetails.objects.filter(village_code=staffob[0].village_code)
+    url='/staff/home/username='
+    return render(request,'homepage/staffhome.html',{'cid':staffob[0].pk,'objs':objs,'url':url})
+
+@login_required(login_url="login/staff/")
+def displaytostaff(request,username):
+    ob = CitizenDetails.objects.filter(username=username[9:])
+    ob2=Survey.objects.filter(username=username[9:])
+    view=False
+    if not ob2.exists():
+        print('username =',ob[0].username)
+        user='CitizenDetails object ('+ob[0].username+')'
+        instance=Survey()
+        instance.username=user
+        instance.name=ob[0].name
+        instance.house_no=ob[0].house_no
+        instance.address=ob[0].address
+        instance.save()
+    url1='/staff/home/survey/username='
+    url2='/staff/home/survey_display/username='
+    if ob2:
+        if ob2[0].survey_desc:
+            view=True
+    return render(request,'allforms/applicationform_dis_tostaff.html',{'instance':ob[0],'url1':url1,'url2':url2,'view':view,'username':username[9:]})
+
+def surveyform_fill(request,username):
+    instance=Survey.objects.filter(username=username[9:])
+    if request.method=='POST':
+        instance[0].survey_desc=request.POST['survey_desc']
+        instance[0].estimated_loss=request.POST['estimated_loss']
+        instance.save()
+        return HttpResponseRedirect('/staff/home/survey/username='+username)
+  
+    return render(request,'allforms/surveyform_fill.html')
+
+def display_surveyform(request,username):
+    instance=Survey.objects.filter(username=username)
+    return render(request,'surveyform_display.html',{'instance':instance})
+

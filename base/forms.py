@@ -2,6 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CitizenUser, StaffUser
+from django.forms import ModelForm
 
 class CitizenUserCreationForm(UserCreationForm):
     class Meta:
@@ -11,4 +12,8 @@ class CitizenUserCreationForm(UserCreationForm):
 class StaffUserCreationForm(UserCreationForm):
     class Meta:
         model = StaffUser
-        fields = ['name','phone','email','position','staff_id','password1','password2']
+        fields = ['name','phone','email','position','village_code','username','password1','password2']
+
+
+
+
