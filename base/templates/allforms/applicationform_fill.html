@@ -1,0 +1,25 @@
+<!-- <form method="post" action="{% url 'citizen_register' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Register</button>
+  </form> -->
+
+  {% if not submitted %}
+  <form method="post" action="">
+    {% csrf_token %}
+    <input type="text" name="house_no" placeholder="house_no" required="True"><br>
+    <input type="text" name="house_name" placeholder="house_name" required="True"><br>
+    <input type="text" name="address" placeholder="address" required="True"><br>
+    <input type="text" name="village_code" placeholder="village_code" required="True"><br>
+    <input type="text" name="aadhar_no" placeholder="aadhar_no" required="True"><br>
+    <input type="text" name="ration_no" placeholder="ration_no" required="True"><br>
+    <input type="text" name="account_no" placeholder="account_no" required="True"><br>
+    <input type="text" name="ifsc" placeholder="ifsc" required="True"><br>
+    <input type="text" name="description" placeholder="description" required="True"><br>
+    <button type="submit">Register</button>
+    <h1>{{ user }}</h1>
+  </form>
+  {% else %}
+  <h1>Your Application is submitted</h1>
+  <a href='/citizen/applicationform_display'> See Application Form</a>
+  {% endif %}

@@ -1,0 +1,14 @@
+<form method="post" action="">
+    {% csrf_token %}
+    <h3>Detail : {{ instance.name }}</h3>
+  <h3>Name : {{ instance.house_no }}</h3>
+  <h3>House name : {{ instance.house_name }}</h3>
+  <h3>Address : {{ instance.address }}</h3>
+    <!-- <input type="text" name="name" placeholder="name" required="True"><br>
+    <input type="text" name="house_no" placeholder="house_no" required="True"><br>
+    <input type="text" name="house_name" placeholder="house_name" required="True"><br>
+    <input type="text" name="address" placeholder="address" required="True"><br> -->
+    <input type="text" name="survey_desc" placeholder="description" required="True"><br>
+    <input type="text" name="estimated loss" placeholder="estimated loss" required="True"><br>
+    <button type="submit">Register</button>
+  </form>

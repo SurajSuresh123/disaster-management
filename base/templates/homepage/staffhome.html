@@ -1,0 +1,14 @@
+<h1>Welcome </h1>
+{% if cid != -1 %}
+<h3>{{ cid }}</h3>
+{% endif %}
+<h1>CITIZEN FORMS</h1>
+{% if not objs %}
+    <h3>No Records</h3>
+{% else %}
+<forms>
+    {% for ob in objs %}
+    <a href={{ url }}{{ ob.pk }}>{{ ob.name }}</a><br>
+    {% endfor %}
+</forms>
+{% endif %}

@@ -1,0 +1,10 @@
+<center>
+    <h1>Login Form</h1>
+    <form action="" method="POST">
+        {% csrf_token %}
+    <input type="text" name="username" placeholder="Staff ID" required="True"><br>
+    <input type="password" name="password" placeholder="Password" required="True"><br>
+    <input type="submit" value="Login">
+    <p>{{ msg }}</p>
+</form>
+  </center>
