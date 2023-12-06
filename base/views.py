@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.utils.text import slugify
 from django.shortcuts import render, redirect
-from django.contrib.auth import login,authenticate
+from django.contrib.auth import login,authenticate,logout
 from .forms import CitizenUserCreationForm, StaffUserCreationForm
 from .models import CitizenUser,CitizenDetails,StaffUser,Survey,Transfer
 from django.contrib import messages
@@ -132,41 +132,50 @@ def staff_home(request):
         return redirect("staff_login")
     staffob=StaffUser.objects.filter(username=user)
     objs=CitizenDetails.objects.filter(village_code=staffob[0].village_code)
-    url='/staff/home/username='
+    url='/staff/home/'
     return render(request,'homepage/staffhome.html',{'cid':staffob[0].pk,'objs':objs,'url':url})
+
+def logoutUser(request):
+    logout(request)
+    return redirect('home-view')
 
 @login_required(login_url="login/staff/")
 def displaytostaff(request,username):
-    ob = CitizenDetails.objects.filter(username=username[9:])
-    ob2=Survey.objects.filter(username=username[9:])
+    ob = CitizenDetails.objects.filter(username=username)
+    ob2=Survey.objects.filter(username=username)
     view=False
     if not ob2.exists():
-        print('username =',ob[0].username)
-        user='CitizenDetails object ('+ob[0].username+')'
+        print('username =',ob[0])
+        user=ob[0]
         instance=Survey()
         instance.username=user
         instance.name=ob[0].name
         instance.house_no=ob[0].house_no
+        instance.house_name=ob[0].house_name
         instance.address=ob[0].address
+        instance.estimated_loss=0
         instance.save()
-    url1='/staff/home/survey/username='
-    url2='/staff/home/survey_display/username='
+    url1='/staff/home/survey/'
+    url2='/staff/home/survey_display/'
     if ob2:
         if ob2[0].survey_desc:
             view=True
-    return render(request,'allforms/applicationform_dis_tostaff.html',{'instance':ob[0],'url1':url1,'url2':url2,'view':view,'username':username[9:]})
+    return render(request,'allforms/applicationform_dis_tostaff.html',{'instance':ob[0],'url1':url1,'url2':url2,'view':view,'username':username})
 
 def surveyform_fill(request,username):
-    instance=Survey.objects.filter(username=username[9:])
+    instance=Survey.objects.get(username=username)
     if request.method=='POST':
+        # instance.survey_desc=request.POST.get('survey_desc')
+        # instance.estimated_loss=request.POST.get('estimated_loss')
         instance[0].survey_desc=request.POST['survey_desc']
         instance[0].estimated_loss=request.POST['estimated_loss']
         instance.save()
-        return HttpResponseRedirect('/staff/home/survey/username='+username)
-  
-    return render(request,'allforms/surveyform_fill.html')
+        print(instance.name)
+        print(instance.survey_desc)
+        return HttpResponseRedirect('/staff/home/'+username)
+    return render(request,'allforms/surveyform_fill.html',{'instance':instance})
 
 def display_surveyform(request,username):
     instance=Survey.objects.filter(username=username)
-    return render(request,'surveyform_display.html',{'instance':instance})
+    return render(request,'allforms/surveyform_display.html',{'instance':instance[0]})
 

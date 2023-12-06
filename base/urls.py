@@ -4,7 +4,7 @@
 # urlpatterns = [path("", views.home)]
 # myapp/urls.py
 from django.urls import path
-from .views import citizen_register, staff_register,home,citizen_login,staff_login,citizen_applicationform,citizen_details_display,citizen_application_status,staff_home,displaytostaff,surveyform_fill,display_surveyform,citizen_home
+from .views import citizen_register, staff_register,home,citizen_login,staff_login,citizen_applicationform,citizen_details_display,citizen_application_status,staff_home,displaytostaff,surveyform_fill,display_surveyform,citizen_home,logoutUser
 
 urlpatterns = [
     path('',home,name='home-view'),
@@ -17,8 +17,9 @@ urlpatterns = [
     path('citizen/applicationform_display',citizen_details_display,name='citizen-details-display'),
     path('citizen/application_status',citizen_application_status,name='app-status'),
     path('staff/home/',staff_home,name='staff-home'),
-    path('staff/home/<str:username>',displaytostaff,name='each-citizen'),
-    path('staff/home/survey/<str:username>',surveyform_fill,name='fill-survey'),
-    path('staff/home/survey_display/<str:username>',surveyform_fill,name='display-survey')
+    path('staff/home/username=<str:username>',displaytostaff,name='each-citizen'),
+    path('staff/home/survey/username=<str:username>',surveyform_fill,name='fill-survey'),
+    path('staff/home/survey_display/username<str:username>',display_surveyform,name='display-survey'),
+    path('logoutUser/',logoutUser,name='logout-user')
     # Add other URLs as needed
 ]
